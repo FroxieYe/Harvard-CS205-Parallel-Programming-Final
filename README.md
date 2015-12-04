@@ -33,5 +33,5 @@ median filter OpenCL kernel
 ![](img/ParallelGraph.png)
 
 
-References
+### References
 Michael J. Black, David H. Marimont, "Robust Anisotropic Diffusion", *IEEE TRANSACTIONS ON IMAGE PROCESSING*, VOL. 7, NO. 3, MARCH 1998
