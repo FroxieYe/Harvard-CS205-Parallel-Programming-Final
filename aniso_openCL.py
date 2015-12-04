@@ -8,6 +8,7 @@ import pylab
 import os.path
 
 from timer import Timer
+from scipy.ndimage import imread
 
 def round_up(global_size, group_size):
     r = global_size % group_size
@@ -66,6 +67,7 @@ if __name__ == '__main__':
             program = cl.Program(context, open('aniso_openCL.cl').read()).build(options=['-I', curdir])
 
             host_image = np.load('image.npz')['image'].astype(np.float32).copy()
+            #host_image = imread("fc_lion.jpg").astype(np.float32).copy()
             host_image_filtered = np.zeros_like(host_image)
 
             gpu_image_a = cl.Buffer(context, cl.mem_flags.READ_WRITE, host_image.size * 4)

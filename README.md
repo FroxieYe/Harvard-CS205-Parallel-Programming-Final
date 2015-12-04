@@ -30,12 +30,14 @@ median_filter.cl
 median filter OpenCL kernel
 
 ### Result
-####Sample Image
+####Sample Image -- Harvard Library
 ![](img/original.png)
 ![](img/I020i40.png)
 #### Performance
 ![](img/ParallelGraph.png)
-
+####Sample Image -- Forbidden City
+![](img/originallion.png)
+![](img/I020i40lion.png)
 
 ### References
 Michael J. Black, David H. Marimont, "Robust Anisotropic Diffusion", *IEEE TRANSACTIONS ON IMAGE PROCESSING*, VOL. 7, NO. 3, MARCH 1998
