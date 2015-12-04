@@ -5,7 +5,7 @@
 * Yuhao Zhu \<yuhaozhu@g.harvard.edu\>
 
 ### Description
-This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python.
+This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python. The result of the Harvard library image shows that the serial (vectorized) version in python takes 165.980142117 seconds for 40 filter passes, whereas the openCL version speeds up more than 40 times. We use three different ways to parallelize the diffusion process in openCL. The first version parallelizes the 2d image by block and uses a local buffer to store the value. The second version parallelizes by column. Within a column (workgroup), we construct a buffer in the local memory and iteratively update the buffer and the output values. Due to the halo, there will be overlapped rows when we update the buffer within a workgroup in the second version. The third version takes advantage of this by keeping and reusing the overlapped values, therefore reducing the cost of reading them again to the local memory. The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup.
 
 ### Instructions for the code
 
