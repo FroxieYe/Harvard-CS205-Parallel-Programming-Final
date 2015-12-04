@@ -30,6 +30,10 @@ median_filter.cl
 median filter OpenCL kernel
 
 ### Result
+####Sample Image
+![](img/original.png)
+![](img/l020i40.png)
+#### Performance
 ![](img/ParallelGraph.png)
 
 
