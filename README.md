@@ -1,5 +1,5 @@
 # Harvard-CS205-Parallel-Programming-Final
-Harvard CS205 Parallel Programming Final Project. Anisotropic Diffusion using OpenCL
+##Harvard CS205 Parallel Programming Final Project. Anisotropic Diffusion using OpenCL
 Wenshuai Ye, Yuhao Zhu
 
 This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python.
