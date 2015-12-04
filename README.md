@@ -7,7 +7,7 @@
 ### Description
 This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python.
 
-### Instructions for running the code
+### Instructions for the code
 
 ```
 anisodiff.py
@@ -35,9 +35,11 @@ median filter OpenCL kernel
 ![](img/I020i40.png)
 #### Performance
 ![](img/ParallelGraph.png)
-####Sample Image -- Forbidden City
+#### Sample Image -- Forbidden City
 ![](img/originallion.png)
 ![](img/l020i40lion.png)
+#### Performance
+![](img/lionGraph.png)
 
 ### References
 Michael J. Black, David H. Marimont, "Robust Anisotropic Diffusion", *IEEE TRANSACTIONS ON IMAGE PROCESSING*, VOL. 7, NO. 3, MARCH 1998
