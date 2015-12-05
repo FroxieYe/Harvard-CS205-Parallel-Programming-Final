@@ -239,40 +239,72 @@ aniso_reusedparallel(__global __read_only float *in_values,
     // 1D index of thread within our work-group
     const int idx_1D = ly * get_local_size(0) + lx;
 
-    int row, start;
+    int row;
+    int start = 2;
+    int idx[4] = {3, 0, 1, 2}; // For index trick;
     // Due to the halo, some values in the buffer can be reused. This version takes advantage of this by reading new values to the
     // local memory only when it is necessary.
     for (int base = 0; base < h; base += buf_h - 2) {
-
-        if (base == 0) start = 0;
-        else start = 2;
-        if (idx_1D < buf_w)
-            for (row = start; row < buf_h; row++) {
-                buffer[row * buf_w + idx_1D] = \
-                    get_values(in_values, w, h, buf_corner_x + idx_1D, buf_corner_y + row + base);
-            }
-        barrier(CLK_LOCAL_MEM_FENCE);
-        if ((y < h) && (x < w)) { // stay in bounds
-    
-            float cur_pix = buffer[buf_y * buf_w + buf_x];
-            float dif1 = buffer[buf_y * buf_w + buf_x+1] - cur_pix;
-            float dif2 = buffer[buf_y * buf_w + buf_x-1] - cur_pix;
-            float dif3 = buffer[(buf_y+1) * buf_w + buf_x] - cur_pix;
-            float dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;
-
-            out_values[y * w + x] = cur_pix;
-            float k = 35.0;
-            float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
-            //if (y == 16 && x == 0) printf("base = %f\n", value);
-            out_values[y * w + x] += lambda/4*value;      
-        }
-        y += buf_h-2;
-        barrier(CLK_LOCAL_MEM_FENCE);
+        //if (base == 0) start = 0;
+        //else start = 2;
+        if (base == 0) {
+            if (idx_1D < buf_w)
+                for (row = 0; row < buf_h; row++) {
+                    buffer[row * buf_w + idx_1D] = \
+                        get_values(in_values, w, h, buf_corner_x + idx_1D, buf_corner_y + row + base);
+                }
+            barrier(CLK_LOCAL_MEM_FENCE);
+            if ((y < h) && (x < w)) { // stay in bounds
         
-        if (idx_1D < buf_w) {
-            for (row = buf_h - 3; row < buf_h; row++) {
-                buffer[(row - buf_h + 3)*buf_w + idx_1D] = buffer[row * buf_w + idx_1D];
+                float cur_pix = buffer[buf_y * buf_w + buf_x];
+                float dif1 = buffer[buf_y * buf_w + buf_x+1] - cur_pix;
+                float dif2 = buffer[buf_y * buf_w + buf_x-1] - cur_pix;
+                float dif3 = buffer[(buf_y+1) * buf_w + buf_x] - cur_pix;
+                float dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;
+
+                out_values[y * w + x] = cur_pix;
+                float k = 35.0;
+                float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
+                //if (y == 16 && x == 0) printf("base = %f\n", value);
+                out_values[y * w + x] += lambda/4*value;      
             }
+            y += buf_h-2;
+            barrier(CLK_LOCAL_MEM_FENCE);
+            /*
+            if (idx_1D < buf_w) {
+                for (row = buf_h - 3; row < buf_h; row++) {
+                    buffer[(row - buf_h + 3)*buf_w + idx_1D] = buffer[row * buf_w + idx_1D];
+                }
+            }
+            */
+        }
+        else {
+            if (idx_1D < buf_w)
+                for (row = 2; row < buf_h; row++) {
+                    buffer[(row - start) * buf_w + idx_1D] = \
+                        get_values(in_values, w, h, buf_corner_x + idx_1D, buf_corner_y + row + base+2);
+                }
+                if (start == 2) start = 0;
+                else start = 2;
+            barrier(CLK_LOCAL_MEM_FENCE);
+            if ((y < h) && (x < w)) { // stay in bounds
+                int c = buf_y % 4;
+                int d = (buf_y - 1) % 4;
+                int u = (buf_y + 1) % 4;
+                float cur_pix = buffer[c * buf_w + buf_x];
+                float dif1 = buffer[c * buf_w + buf_x+1] - cur_pix;
+                float dif2 = buffer[c * buf_w + buf_x-1] - cur_pix;
+                float dif3 = buffer[u * buf_w + buf_x] - cur_pix;
+                float dif4 = buffer[d * buf_w + buf_x] - cur_pix;
+
+                out_values[y * w + x] = cur_pix;
+                float k = 35.0;
+                float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
+                //if (y == 16 && x == 0) printf("base = %f\n", value);
+                out_values[y * w + x] += lambda/4*value;      
+            }
+            barrier(CLK_LOCAL_MEM_FENCE);
+            y += buf_h-2;
         }
     }
 }
