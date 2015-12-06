@@ -36,7 +36,7 @@ aniso_nobufferparallel(__global __read_only float *in_values,
     const int x = get_global_id(0);
     const int y = get_global_id(1);
     float k = 35.0;
-    // write output by calling the median9 function from median9.h.
+    // write output by computing the difference of the neighbors.
     if ((y < h) && (x < w)) { // stay in bounds
         // Anisotropic diffusion uses four neighbors to calculate diffusion.
         float cur_pix = in_values[y * w + x];
@@ -93,7 +93,7 @@ aniso_blockparallel(__global __read_only float *in_values,
 
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    // write output by calling the median9 function from median9.h.
+    // write output by computing the difference of the neighbors
     if ((y < h) && (x < w)) { // stay in bounds
         
         // Anisotropic diffusion uses four neighbors to calculate diffusion.
