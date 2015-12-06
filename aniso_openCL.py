@@ -136,7 +136,7 @@ if __name__ == '__main__':
             times.append(t1.interval)
         pylab.plot(size1, times, label = labels[method], marker = ".")
         pylab.title("Effciency vs Different Parallelization")
-        pylab.xlabel("Size")
+        pylab.xlabel("Local Size Width (Height = 2)")
         pylab.ylabel("Time")
         pylab.legend(loc="best")
     pylab.show()
