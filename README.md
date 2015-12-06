@@ -65,7 +65,7 @@ median filter OpenCL kernel
 
 ### Performance Conclusion
 
-The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup. However, when we used a much smaller image with height greater than its width, the block wise parallel method has better performance.
+The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup. However, when we used a much smaller image, the block wise parallel method has better performance.
 
 
 ### References
