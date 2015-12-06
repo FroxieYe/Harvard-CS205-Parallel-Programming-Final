@@ -138,7 +138,7 @@ if __name__ == '__main__':
                     # swap filtering direction
                     gpu_image_a, gpu_image_b = gpu_image_b, gpu_image_a
 
-                cl.enqueue_copy(queue, host_image_filtered, gpu_image_a, is_blocking=True)
+                
             print("{} seconds for 40 filter passes using vectorization in openCL.".format(t1.interval))
             times.append(t1.interval)
             '''
@@ -146,6 +146,7 @@ if __name__ == '__main__':
             pylab.imshow(host_image_filtered[1200:1800, 3000:3500])
             pylab.title('after - zoom')
             '''
+            cl.enqueue_copy(queue, host_image_filtered, gpu_image_a, is_blocking=True)
         pylab.plot(size1, times, label = labels[method], marker = ".")
         pylab.title("Effciency vs Different Parallelization")
         pylab.xlabel("Local Size Width (Height = 2)")

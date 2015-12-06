@@ -35,28 +35,17 @@ aniso_nobufferparallel(__global __read_only float *in_values,
 
     const int x = get_global_id(0);
     const int y = get_global_id(1);
-
-    // Local position relative to (0, 0) in workgroup
-    const int lx = get_local_id(0);
-    const int ly = get_local_id(1);
-
-
-    // 1D index of thread within our work-group
-    const int idx_1D = ly * get_local_size(0) + lx;
-
-    int row;
-
+    float k = 35.0;
     // write output by calling the median9 function from median9.h.
     if ((y < h) && (x < w)) { // stay in bounds
         // Anisotropic diffusion uses four neighbors to calculate diffusion.
         float cur_pix = in_values[y * w + x];
-        float dif1 = in_values[y * w + x+1]; - cur_pix;
-        float dif2 = in_values[y * w + x-1] - cur_pix;
-        float dif3 = in_values[(y+1) * w + x] - cur_pix;
-        float dif4 = in_values[(y-1) * w + x] - cur_pix;
+        float dif1 = get_values(in_values, w, h, x+1, y);
+        float dif2 = get_values(in_values, w, h, x-1, y);
+        float dif3 = get_values(in_values, w, h, x, y+1);
+        float dif4 = get_values(in_values, w, h, x, y-1);
 
         out_values[y * w + x] = cur_pix;
-        float k = 35.0;
         float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
         // Compute the updated pixel value after one iteration.
         out_values[y * w + x] += lambda/4*value;      
@@ -95,7 +84,7 @@ aniso_blockparallel(__global __read_only float *in_values,
     const int idx_1D = ly * get_local_size(0) + lx;
 
     int row;
-
+    float k = 35.0;
     if (idx_1D < buf_w)
         for (row = 0; row < buf_h; row++) {
             buffer[row * buf_w + idx_1D] = \
@@ -115,7 +104,6 @@ aniso_blockparallel(__global __read_only float *in_values,
         float dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;
 
         out_values[y * w + x] = cur_pix;
-        float k = 35.0;
         float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
         // Compute the updated pixel value after one iteration.
         out_values[y * w + x] += lambda/4*value;      
@@ -155,6 +143,7 @@ aniso_colparallel(__global __read_only float *in_values,
     const int idx_1D = ly * get_local_size(0) + lx;
 
     int row;
+    float k = 35.0;
     // The column wise parallel programming uses a loop to read in data to the buffer for each work group.
     for (int base = 0; base < h; base += buf_h - 2) {
         if (idx_1D < buf_w)
@@ -172,13 +161,12 @@ aniso_colparallel(__global __read_only float *in_values,
             float dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;
 
             out_values[y * w + x] = cur_pix;
-            float k = 35.0;
             float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
             //if (y == 16 && x == 0) printf("base = %f\n", value);
             out_values[y * w + x] += lambda/4*value;      
         }
         y += buf_h-2;
-        barrier(CLK_LOCAL_MEM_FENCE);
+        //barrier(CLK_LOCAL_MEM_FENCE);
     }
 }
 
@@ -214,7 +202,8 @@ aniso_reusedparallel(__global __read_only float *in_values,
     const int idx_1D = ly * get_local_size(0) + lx;
 
     int row;
-    int idx[4] = {3, 0, 1, 2}; // For index trick;
+    float dif1, dif2, dif3, dif4, cur_pix, value;
+    float k = 35;
     // Due to the halo, some values in the buffer can be reused. This version takes advantage of this by reading new values to the
     // local memory only when it is necessary.
     for (int base = 0; base < h; base += buf_h - 2) {
@@ -229,21 +218,12 @@ aniso_reusedparallel(__global __read_only float *in_values,
             barrier(CLK_LOCAL_MEM_FENCE);
             if ((y < h) && (x < w)) { // stay in bounds
         
-                float cur_pix = buffer[buf_y * buf_w + buf_x];
-                float dif1 = buffer[buf_y * buf_w + buf_x+1] - cur_pix;
-                float dif2 = buffer[buf_y * buf_w + buf_x-1] - cur_pix;
-                float dif3 = buffer[(buf_y+1) * buf_w + buf_x] - cur_pix;
-                float dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;
-
-                out_values[y * w + x] = cur_pix;
-                float k = 35.0;
-                float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
-                //if (y == 16 && x == 0) printf("base = %f\n", value);
-                out_values[y * w + x] += lambda/4*value;      
+                cur_pix = buffer[buf_y * buf_w + buf_x];
+                dif1 = buffer[buf_y * buf_w + buf_x+1] - cur_pix;
+                dif2 = buffer[buf_y * buf_w + buf_x-1] - cur_pix;
+                dif3 = buffer[(buf_y+1) * buf_w + buf_x] - cur_pix;
+                dif4 = buffer[(buf_y-1) * buf_w + buf_x] - cur_pix;   
             }
-            y += buf_h-2;
-            barrier(CLK_LOCAL_MEM_FENCE);
-
         }
         else {
             // Index trick to avoid rereading values that are already in the buffer.
@@ -257,21 +237,20 @@ aniso_reusedparallel(__global __read_only float *in_values,
                 int c = (y+halo)&3;
                 int d = (y - 1 + halo)&3;
                 int u = (y + 1 + halo)&3;
-                float cur_pix = buffer[c * buf_w + buf_x];
-                float dif1 = buffer[c * buf_w + buf_x+1] - cur_pix;
-                float dif2 = buffer[c * buf_w + buf_x-1] - cur_pix;
-                float dif3 = buffer[u * buf_w + buf_x] - cur_pix;
-                float dif4 = buffer[d * buf_w + buf_x] - cur_pix;
-
-                out_values[y * w + x] = cur_pix;
-                float k = 35.0;
-                float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
-                //if (y == 16 && x == 0) printf("base = %f\n", value);
-                out_values[y * w + x] += lambda/4*value;      
+                cur_pix = buffer[c * buf_w + buf_x];
+                dif1 = buffer[c * buf_w + buf_x+1] - cur_pix;
+                dif2 = buffer[c * buf_w + buf_x-1] - cur_pix;
+                dif3 = buffer[u * buf_w + buf_x] - cur_pix;
+                dif4 = buffer[d * buf_w + buf_x] - cur_pix;   
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
-            y += buf_h-2;
         }
+        if ((y < h) && (x < w)) {
+            out_values[y * w + x] = cur_pix;
+            value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
+            out_values[y * w + x] += lambda/4*value; 
+        }
+        y += buf_h-2;
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
 }
 
