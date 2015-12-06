@@ -12,7 +12,7 @@ In image processing and computer vision, anisotropic diffusion, also called Pero
 ![](img/fourneighbors.png)
 
 ### Description
-This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python. The result of the Harvard library image shows that the serial (vectorized) version in python takes 165.980142117 seconds for 40 filter passes, whereas the openCL version speeds up more than 40 times. 
+This project explores different parallel implementations of robust anisotropic diffusion [1] in openCL and compares the performance of them with the serial version in python. The result of the Harvard library image shows that the serial (vectorized) version in python takes 165.980142117 seconds for 40 filter passes, whereas the openCL version speeds up more than 200 times. 
 
 ### Machine Used
 Apple Apple version: OpenCL 1.2 (Feb 27 2015 01:29:10)
