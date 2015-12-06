@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html class="full" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="icon" href="../../favicon.ico"> -->
+
+    <title>CS205finalproject</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/justified-nav.css" rel="stylesheet">
+
+    <link rel="stylesheet" id="font-awesome-css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" type="text/css" media="screen">
+
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+    <style>
+      p {
+        font-size: 15px;
+      }
+      img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width:50%;
+      }
+      form {
+        margin-left:18px;
+      }
+      ol>li {
+        font-size:15px;
+      }
+      .back-to-top {
+        position: fixed;
+        bottom: 2em;
+        right: 0px;
+        text-decoration: none;
+        color: #000000;
+        background-color: rgba(235, 235, 235, 0.80);
+        font-size: 12px;
+        padding: 1em;
+        display: none;
+      }
+
+      .back-to-top:hover {    
+          background-color: rgba(135, 135, 135, 0.50);
+      }
+    </style>
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <a href="#" class="back-to-top">Back to Top</a>
+
+    <div class="container">
+
+      <!-- The justified navigation menu is meant for single line per list item.
+           Multiple lines will require custom code not provided by Bootstrap. -->
+      <div class="masthead">
+        <img src="img/SEASLogo.png" style="width:500px">
+        <h3 class="text-muted", align="middle">Anisotropic Diffusion Implementation with GPU Parallel Programming in OpenCL</h3>
+        <nav>
+          <ul class="nav nav-justified">
+            <li class="active"><a id="ahome" href="#" data="#home">Home</a></li>
+            <li><a id="aintroduction" href="#" data="#introduction">Introduction</a></li>
+            <li><a id="amethod" href="#" data="#method">Methods</a></li>
+            <li><a id="aresults" href="#" data="#results">Results</a></li>
+          </ul>
+        </nav>
+      </div>
+
+
+      <div id="home">
+        <!-- Jumbotron -->
+        <div class="jumbotron">
+          <h2>Anisotropic Diffusion Implementation with GPU Parallel Programming in OpenCL</h2>
+          <p class="lead">Wenshuai Ye, Yuhao Zhu</p>
+          <p>CS205: Final Project </p>
+          <p>Instructor: Thouis "Ray" Jones, TF: Thouis "Ray" Jones</p>
+          <!--
+          <p>
+            <span class="slogan"></span>
+          </p>
+          
+          <p><a class="btn btn-lg btn-success" href="https://murmuring-garden-1723.herokuapp.com/" role="button" target="_blank">Try Live Demo</a></p> -->
+        </div>
+
+       
+
+      </div>
+
+      <div id="introduction", class="hidden">
+        <h2>Introduction</h2>
+        <p>Image processing is a mathematical operation on signals of images. It includes image sharpening, image smoothing, image segmentation, etc. Well­ designed algorithms have been studied for these methods. However, for high resolution images, it would take a long time to run. It is important that image is processed and analyzed using image processing algorithms at minimum cost. By parallelizing of the algorithm, we can optimize the speed at which the image is processed. This project explores the parallel implementation of many sequential algorithms of image processing. The main objective of this project is to design some image processing algorithms such as Gaussian algorithm in smoothing in parallel mode. These parallel algorithms are able to work with different number of threads and to take all the benefits of the processors.</p>
+
+        <p>In image processing and computer vision, anisotropic diffusion, also called Perona–Malik diffusion, is a technique aiming at reducing image noise without removing significant parts of the image content via a partial differential equation (PDE), replaced the classical isotropic diffusion with, </p>
+        <img src="img/aniso.png", style="width:300px">
+
+        <p>This function is to make sure the diffusion is "stopped" across edges. Typically edges, lines or other details that are important for the interpretation of the image. Mathematically, the pixels can be updated iteratively by averaging the gradients of their four neighbors as the figure below, and the gradients can be approximated with the difference. g is an edge-stopping function and in our case, a Gaussian function.</p>
+        <img src="img/fourneighbors.png", style="width:200px"> 
+
+        <p>In this project, our goal is to develop an efficient multi­functional image processing toolkit. This toolkit has multiple image processing functions such as smoothing, sharpening, denoising, motion blurring, and edge finding. In traditional image processings, image filtering are applied to exert various effects on photos. The center of a selected filter matrix has to be multiplied with the current pixel, the other elements of the filter matrix with corresponding neighbor pixels. In other words, only one pixel’s value is going to be changed at one time.</p>
+
+        <p>In our project, we plan to improve efficiency via parallel computing. We are going to use Anisotropic Diffusion algorithm as follows:</p>
+        <img src="img/equation.png", style="width:350px">
+
+        <p>which is good at removing random noise. Averaging should only concern pixels that belong to the same region, to avoid artifacts at the borders between regions and to improve the denoising efficiency. Anisotropic diffusion resembles the process that creates a scale space, where an image generates a parameterized family of successively more and more blurred images based on a diffusion process. Each of the resulting images in this family are given as a convolution between the image and a 2D isotropic Gaussian filter, where the width of the filter increases with the parameter. The parallel computing can be adopted when we filter the image.</p>
+        
+        
+       
+
+
+    
+
+      </div>
+
+      <div id="method", class="hidden">
+        <h2>Methods</h2>
+
+        <h3>Method 1: Blockwise Parallel Programming</h3>
+        
+        <p>We partition the 2d image into multiple work groups, each with size (x, 2) where x takes in the value in [8, 16, 32, 64, 128]. We choose a relatively small height for each work group in that we read the value to the local buffer only when the one dimensional index is less than the width of the row and don't want that many threads to wait in the process. This method works best when the height of the image is relatively small.</p>
+
+        <img src="img/method1.png", style="width:300px">
+
+        <h3>Method 2: Columnwise Parallel Programming</h3>
+
+        <p>This method sacrifices parallelization for less number of workgroups in total without changing the local size. Again, the local size is (x, 2) where x takes in the value in [8, 16, 32, 64, 128], and the height of the global size equals that of the local size. Since the global size does not cover the entire image, we use a loop within each work group to update the buffer and the output image pixels. This is definitely not the best method among three. We introduce an improved version in method 3, which utilizes the index trick.</p>
+
+        <img src="img/method2.png", style="width:300px">
+
+        <h3>Method 3: Columnwise Parallel Programming with Index Trick (Reused Buffer)</h3>
+
+        <p>Because the size of our halo is greater than 0. The buffer we construct and update in the second method will have overlapped parts in the iteration. The index trick captures the feature and update the values only when necessary, as demonstrated in the image below (special thanks Ray for drawing the image).</p>
+
+        <img src="img/IndexOverlap.png", style="width:500px">
+
+        <h4>Method 3: Blockwise Parallel Programming without Local Buffer</h3>
+
+        <p>The last method is to get rid of the local buffer and read the pixel values from the global memory directly instead. Theoretically, reading from the global memory would be slow. However, in my system, this method outperforms the other three.</p>
+
+
+
+
+
+
+      </div>
+      
+
+
+
+      <div id="results", class="hidden">
+        <h2>Results</h2>
+        
+        <p>The result from the both images shows that the last method outperforms the other two given that we optimize the workgroup. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest</p>
+
+        <img src="img/original.png", align="left"> 
+        <img src="img/after.png", align="right">
+        <img src="img/ParallelGraph.png">
+
+        <p>However, when we use a much smaller image, the block wise parallel method has the second better performance.</p>
+
+        <img src="img/originallion.png", align="left"> 
+        <img src="img/l020i40lion.png", align="right">
+        <img src="img/lionGraph.png">
+        
+
+
+        <h3>Acknowledgements</h3>
+        <p>We thank Thouis "Ray" Jones and all TFs for providing guidance and support.</p>
+       
+
+        <h3>Contact information</h3>
+        <p>Wenshuai Ye: wenshuaiye@g.harvard.edu</p>
+        <p>Yuhao Zhu: yuhaozhu@g.harvard.edu</p>
+        
+
+        
+      </div>
+
+
+
+      <!-- Site footer -->
+      <footer class="footer">
+        <p>&copy; Wenshuai Ye, Yuhao Zhu</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+    <script type="text/javascript">
+      $("ul.nav-justified li").each(function() {
+        $(this).on("click", function() {
+          var cur_href = $("li.active > a").attr('data');
+          $(cur_href).addClass('hidden')
+          $('ul.nav-justified li.active').removeClass('active')
+          $(this).addClass('active')
+          //var cur_href = $("li.active").attr('href');
+          var cur_href = $("li.active>a").attr('data');
+          //alert(cur_href);
+          $(cur_href).removeClass("hidden");
+        // Toggle classes of divs
+        });
+      });
+
+      $(".detail").each(function() {
+        $(this).on("click", function() {
+          var cur_href = $("li.active > a").attr('data');
+          
+          $(cur_href).addClass('hidden')
+          $('ul.nav-justified li.active').removeClass('active')
+
+          var cur_href = $(this).attr('data');
+          //alert(("a"+cur_href));
+          $("a"+cur_href).parent().addClass('active')
+          //var cur_href = $("li.active").attr('href');
+          var cur_href = $("li.active>a").attr('data');
+          //alert(cur_href);
+          $(cur_href).removeClass("hidden");
+        // Toggle classes of divs
+        });
+      });
+
+      jQuery(document).ready(function() {
+        var offset = 220;
+        var duration = 500;
+        jQuery(window).scroll(function() {
+            if (jQuery(this).scrollTop() > offset) {
+                jQuery('.back-to-top').fadeIn(duration);
+            } else {
+                jQuery('.back-to-top').fadeOut(duration);
+            }
+        });
+        
+        jQuery('.back-to-top').click(function(event) {
+            event.preventDefault();
+            jQuery('html, body').animate({scrollTop: 0}, duration);
+            return false;
+        })
+      });
+    </script>
+    
+
+   
+
+  </body>
+</html>
