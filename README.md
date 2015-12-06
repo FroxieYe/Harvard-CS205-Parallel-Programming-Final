@@ -29,10 +29,6 @@ Because the size of our halo is greater than 0. The buffer we construct and upda
 
 ![](img/index_trick.png)
 
-### Performance
-
-The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup. However, when we used a much smaller image with height greater than its width, the block wise parallel method has better performance.
-
 ### Code Instructions
 
 ```
@@ -66,6 +62,11 @@ median filter OpenCL kernel
 ![](img/l020i40lion.png)
 #### Performance
 ![](img/lionGraph.png)
+
+### Performance Conclusion
+
+The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup. However, when we used a much smaller image with height greater than its width, the block wise parallel method has better performance.
+
 
 ### References
 [1] Michael J. Black, David H. Marimont, "Robust Anisotropic Diffusion", *IEEE TRANSACTIONS ON IMAGE PROCESSING*, VOL. 7, NO. 3, MARCH 1998
