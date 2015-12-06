@@ -93,7 +93,7 @@ median filter OpenCL kernel
 
 ### Performance Conclusion
 
-The result from the both images shows that the last method outperforms the other two given that we optimize the workgroup. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest. However, when we use a much smaller image, the block wise parallel method has the second better performance.
+The result from both images shows that the method without the buffer works best in my computer. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest. However, when we use a much smaller image, the block wise parallel method has the second better performance.
 
 
 ### References
