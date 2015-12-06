@@ -27,6 +27,10 @@ This method sacrifices parallelization for less number of workgroups in total wi
 
 Because the size of our halo is greater than 0. The buffer we construct and update in the second method will have overlapped parts in the iteration. The index trick captures the feature and update the values only when necessary, as demonstrated in the image below (special thanks Ray for drawing the image).
 
+####Method 4: Blockwise Parallel without Local Buffer
+
+The last method is to get rid of the local buffer and read the pixel values from the global memory directly instead. Theoretically, reading from the global memory would be slow. However, in my system, this method outperforms the other three.
+
 ![](img/index_trick.png)
 
 ### Code Instructions
@@ -65,7 +69,7 @@ median filter OpenCL kernel
 
 ### Performance Conclusion
 
-The result from the Harvard library image shows that the third method slightly outperforms the other two given that we optimize the workgroup. However, when we used a much smaller image, the block wise parallel method has better performance.
+The result from the both images shows that the last method outperforms the other two given that we optimize the workgroup. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest. However, when we use a much smaller image, the block wise parallel method has the second better performance.
 
 
 ### References

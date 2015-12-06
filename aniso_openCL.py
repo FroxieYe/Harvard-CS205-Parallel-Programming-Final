@@ -30,8 +30,8 @@ def numpy_median(image, iterations=10):
 if __name__ == '__main__':
     # List our platforms
     size1 = [8, 16, 32, 64, 128]
-    labels = ["Block Parallel", "Column Parallel", "Column Reused Buffer"]
-    for method in xrange(3):
+    labels = ["Block Parallel", "Column Parallel", "Column Reused Buffer Parallel", "No Buffer Parallel"]
+    for method in xrange(4):
         times = []
         for size in size1:
             platforms = cl.get_platforms()
@@ -63,7 +63,7 @@ if __name__ == '__main__':
             print 'The queue is using the device:', queue.device.name
 
             curdir = os.path.dirname(os.path.realpath(__file__))
-            #program = cl.Program(context, open('anisodiff.cl').read()).build(options=['-I', curdir])
+
             program = cl.Program(context, open('aniso_openCL.cl').read()).build(options=['-I', curdir])
 
             host_image = np.load('image.npz')['image'].astype(np.float32).copy()
@@ -80,7 +80,7 @@ if __name__ == '__main__':
             local_size = (size, 2)  # 64 pixels per work group (32, 8)
 
             global_size = tuple([round_up(g, l) for g, l in zip(host_image.shape[::-1], local_size)]) #(global image size, 1)
-            if method != 0: global_size = (global_size[0], local_size[1])
+            if method not in {0,3}: global_size = (global_size[0], local_size[1])
 
             width = np.int32(host_image.shape[1])
             height = np.int32(host_image.shape[0])
@@ -107,6 +107,8 @@ if __name__ == '__main__':
             pylab.imshow(host_image[1200:1800, 3000:3500])
             pylab.title('before - zoom')
             '''
+           
+            
             l = 0.2
             num_iters = 40
      
@@ -122,9 +124,14 @@ if __name__ == '__main__':
                                            gpu_image_a, gpu_image_b, local_memory,
                                            width, height,
                                            buf_width, buf_height, halo, np.float32(l));
-                    else:
+                    elif method == 2:
                         program.aniso_reusedparallel(queue, global_size, local_size,
                                            gpu_image_a, gpu_image_b, local_memory,
+                                           width, height,
+                                           buf_width, buf_height, halo, np.float32(l));
+                    else:
+                        program.aniso_nobufferparallel(queue, global_size, local_size,
+                                           gpu_image_a, gpu_image_b, 
                                            width, height,
                                            buf_width, buf_height, halo, np.float32(l));
 
@@ -134,11 +141,17 @@ if __name__ == '__main__':
                 cl.enqueue_copy(queue, host_image_filtered, gpu_image_a, is_blocking=True)
             print("{} seconds for 40 filter passes using vectorization in openCL.".format(t1.interval))
             times.append(t1.interval)
+            '''
+            pylab.figure()
+            pylab.imshow(host_image_filtered[1200:1800, 3000:3500])
+            pylab.title('after - zoom')
+            '''
         pylab.plot(size1, times, label = labels[method], marker = ".")
         pylab.title("Effciency vs Different Parallelization")
         pylab.xlabel("Local Size Width (Height = 2)")
         pylab.ylabel("Time")
         pylab.legend(loc="best")
+        
     pylab.show()
 
     '''

@@ -24,6 +24,67 @@ inline float g(float dif, float kappa){
     //return 1;
 }
 
+__kernel void
+aniso_nobufferparallel(__global __read_only float *in_values,
+           __global __write_only float *out_values,
+           int w, int h,
+           int buf_w, int buf_h,
+           const int halo,
+           float lambda)
+{
+    // Note: It may be easier for you to implement median filtering
+    // without using the local buffer, first, then adjust your code to
+    // use such a buffer after you have that working.
+
+    // Load into buffer (with 1-pixel halo).
+    //
+    // It may be helpful to consult HW3 Problem 5, and
+    // https://github.com/harvard-cs205/OpenCL-examples/blob/master/load_halo.cl
+    //
+    // Note that globally out-of-bounds pixels should be replaced
+    // with the nearest valid pixel's value.
+
+
+    // Compute 3x3 median for each pixel in core (non-halo) pixels
+    //
+    // We've given you median9.h, and included it above, so you can
+    // use the median9() function.
+
+
+    // Each thread in the valid region (x < w, y < h) should write
+    // back its 3x3 neighborhood median.
+    // Global position of output pixel
+  
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
+
+    // Local position relative to (0, 0) in workgroup
+    const int lx = get_local_id(0);
+    const int ly = get_local_id(1);
+
+
+    // 1D index of thread within our work-group
+    const int idx_1D = ly * get_local_size(0) + lx;
+
+    int row;
+
+    // write output by calling the median9 function from median9.h.
+    if ((y < h) && (x < w)) { // stay in bounds
+        // Anisotropic diffusion uses four neighbors to calculate diffusion.
+        float cur_pix = in_values[y * w + x];
+        float dif1 = in_values[y * w + x+1]; - cur_pix;
+        float dif2 = in_values[y * w + x-1] - cur_pix;
+        float dif3 = in_values[(y+1) * w + x] - cur_pix;
+        float dif4 = in_values[(y-1) * w + x] - cur_pix;
+
+        out_values[y * w + x] = cur_pix;
+        float k = 35.0;
+        float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
+        // Compute the updated pixel value after one iteration.
+        out_values[y * w + x] += lambda/4*value;      
+    }   
+}
+
 // 3x3 median filter
 __kernel void
 aniso_blockparallel(__global __read_only float *in_values,
@@ -240,7 +301,6 @@ aniso_reusedparallel(__global __read_only float *in_values,
     const int idx_1D = ly * get_local_size(0) + lx;
 
     int row;
-    int start = 2;
     int idx[4] = {3, 0, 1, 2}; // For index trick;
     // Due to the halo, some values in the buffer can be reused. This version takes advantage of this by reading new values to the
     // local memory only when it is necessary.
@@ -270,27 +330,19 @@ aniso_reusedparallel(__global __read_only float *in_values,
             }
             y += buf_h-2;
             barrier(CLK_LOCAL_MEM_FENCE);
-            /*
-            if (idx_1D < buf_w) {
-                for (row = buf_h - 3; row < buf_h; row++) {
-                    buffer[(row - buf_h + 3)*buf_w + idx_1D] = buffer[row * buf_w + idx_1D];
-                }
-            }
-            */
+
         }
         else {
             if (idx_1D < buf_w)
                 for (row = 2; row < buf_h; row++) {
-                    buffer[(row - start) * buf_w + idx_1D] = \
-                        get_values(in_values, w, h, buf_corner_x + idx_1D, buf_corner_y + row + base+2);
+                    buffer[((row + base)&3) * buf_w + idx_1D] = \
+                        get_values(in_values, w, h, buf_corner_x + idx_1D, buf_corner_y + row + base);
                 }
-                if (start == 2) start = 0;
-                else start = 2;
             barrier(CLK_LOCAL_MEM_FENCE);
             if ((y < h) && (x < w)) { // stay in bounds
-                int c = buf_y % 4;
-                int d = (buf_y - 1) % 4;
-                int u = (buf_y + 1) % 4;
+                int c = (y+halo)&3;
+                int d = (y - 1 + halo)&3;
+                int u = (y + 1 + halo)&3;
                 float cur_pix = buffer[c * buf_w + buf_x];
                 float dif1 = buffer[c * buf_w + buf_x+1] - cur_pix;
                 float dif2 = buffer[c * buf_w + buf_x-1] - cur_pix;
