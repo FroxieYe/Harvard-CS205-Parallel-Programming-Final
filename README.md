@@ -16,16 +16,23 @@ This project explores different parallel implementations of robust anisotropic d
 
 ### Machine Used
 Apple Apple version: OpenCL 1.2 (Feb 27 2015 01:29:10)
+
 The devices detected on platform Apple are:
----------------------------
+
 Intel(R) Core(TM) i7-5557U CPU @ 3.10GHz [Type: CPU ]
+
 Maximum clock Frequency: 3100 MHz
+
 Maximum allocable memory size: 4294 MB
+
 Maximum work group size 1024
----------------------------
+
 Intel(R) Iris(TM) Graphics 6100 [Type: GPU ]
+
 Maximum clock Frequency: 1100 MHz
+
 Maximum allocable memory size: 402 MB
+
 Maximum work group size 256
 
 ### Methods
