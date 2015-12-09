@@ -73,7 +73,7 @@
            Multiple lines will require custom code not provided by Bootstrap. -->
       <div class="masthead">
         <img src="img/SEASLogo.png" style="width:500px">
-        <h3 class="text-muted", align="middle">Anisotropic Diffusion Implementation with GPU Parallel Programming in OpenCL</h3>
+        <h3 class="text-muted", align="middle">Anisotropic Diffusion with GPU Parallel Acceleration in OpenCL</h3>
         <nav>
           <ul class="nav nav-justified">
             <li class="active"><a id="ahome" href="#" data="#home">Home</a></li>
@@ -88,10 +88,11 @@
       <div id="home">
         <!-- Jumbotron -->
         <div class="jumbotron">
-          <h2>Anisotropic Diffusion Implementation with GPU Parallel Programming in OpenCL</h2>
+          <h2>Anisotropic Diffusion with GPU Parallel Acceleration in OpenCL</h2>
           <p class="lead">Wenshuai Ye, Yuhao Zhu</p>
           <p>CS205: Final Project </p>
           <p>Instructor: Thouis "Ray" Jones, TF: Thouis "Ray" Jones</p>
+          <p><a href="https://github.com/FroxieYe/Harvard-CS205-Parallel-Programming-Final/tree/master">Go to Github</a></p>
           <!--
           <p>
             <span class="slogan"></span>
@@ -105,32 +106,33 @@
       </div>
 
       <div id="introduction", class="hidden">
-        <h2>Introduction</h2>
-        <p>Image processing is a mathematical operation on signals of images. It includes image sharpening, image smoothing, image segmentation, etc. Well­ designed algorithms have been studied for these methods. However, for high resolution images, it would take a long time to run. It is important that image is processed and analyzed using image processing algorithms at minimum cost. By parallelizing of the algorithm, we can optimize the speed at which the image is processed. This project explores the parallel implementation of many sequential algorithms of image processing. The main objective of this project is to design some image processing algorithms such as Gaussian algorithm in smoothing in parallel mode. These parallel algorithms are able to work with different number of threads and to take all the benefits of the processors.</p>
+        <h3>Introduction</h3>
+        <p>Image processing is a mathematical operation on signals of images. It includes image sharpening, image smoothing, image segmentation, etc. Well­ designed algorithms have been studied for these methods. However, for high resolution images, it would take a long time to run. It is important that image is processed and analyzed using image processing algorithms at minimum cost. By parallelizing the algorithms, we can optimize the speed at which the image is processed. This project explores different parallel implementations of the anisotropic diffusion algorithm in image processing. These parallel algorithms are able to work with different number of threads and to take benefits of machines of various levels.</p>
 
-        <p>In image processing and computer vision, anisotropic diffusion, also called Perona–Malik diffusion, is a technique aiming at reducing image noise without removing significant parts of the image content via a partial differential equation (PDE), replaced the classical isotropic diffusion with, </p>
+        <p>In image processing and computer vision, anisotropic diffusion, also called Perona–Malik diffusion, is a technique aiming at reducing image noise without removing significant parts of the image content via a partial differential equation (PDE), replaced the classical isotropic diffusion with. </p>
         <img src="img/aniso.png", style="width:300px">
 
-        <p>This function is to make sure the diffusion is "stopped" across edges. Typically edges, lines or other details that are important for the interpretation of the image. Mathematically, the pixels can be updated iteratively by averaging the gradients of their four neighbors as the figure below, and the gradients can be approximated with the difference. g is an edge-stopping function and in our case, a Gaussian function.</p>
+        <p>This function g is to make sure the diffusion is "stopped" across edges. Namely, it is an edge-stopping functinon and in ourcase, a Gaussian function. Other candidates include exponential distribution, etc. Mathematically, the pixels can be updated iteratively by averaging the gradients of their four neighbors as the figure below.</p>
         <img src="img/fourneighbors.png", style="width:200px"> 
 
-        <p>In this project, our goal is to develop an efficient multi­functional image processing toolkit. This toolkit has multiple image processing functions such as smoothing, sharpening, denoising, motion blurring, and edge finding. In traditional image processings, image filtering are applied to exert various effects on photos. The center of a selected filter matrix has to be multiplied with the current pixel, the other elements of the filter matrix with corresponding neighbor pixels. In other words, only one pixel’s value is going to be changed at one time.</p>
-
-        <p>In our project, we plan to improve efficiency via parallel computing. We are going to use Anisotropic Diffusion algorithm as follows:</p>
+        <p>Perona and Malik discretized their anisotropic diffusion equation as follows.[2]</p>
         <img src="img/equation.png", style="width:350px">
+        <p>where &lambda; is a scalar that determines the rate of diffusion, |&eta;| represents the spatial neighbor pixels and equals a constant 4 in our case, s indicates the pixel to be updated, and p refers to its four neighbors in four directions. The discretization of gradients can be expressed as follows.</p>
+        <img src="img/gradientDiscretization.png", style="width:300px">
 
-        <p>which is good at removing random noise. Averaging should only concern pixels that belong to the same region, to avoid artifacts at the borders between regions and to improve the denoising efficiency. Anisotropic diffusion resembles the process that creates a scale space, where an image generates a parameterized family of successively more and more blurred images based on a diffusion process. Each of the resulting images in this family are given as a convolution between the image and a 2D isotropic Gaussian filter, where the width of the filter increases with the parameter. The parallel computing can be adopted when we filter the image.</p>
+        <p>In traditional image processings, image filtering are applied to exert various effects on photos. The center of a selected filter matrix has to be multiplied with the current pixel, the other elements of the filter matrix with corresponding neighbor pixels. In other words, only one pixel’s value is going to be updated at one time.</p>
+
+        <p>To improve the efficiency with parallel computing, take advantage of the parallel features among pixels in one iteration and partition pixels into different workgroups in openCL.</p>
         
         
+        <p><strong>References</strong></p>
+        <p>Michael J. Black, David H. Marimont, "Robust Anisotropic Diffusion", <i>IEEE TRANSACTIONS ON IMAGE PROCESSING</i>, VOL. 7, NO. 3, MARCH 1998</p>
        
-
-
-    
 
       </div>
 
       <div id="method", class="hidden">
-        <h2>Methods</h2>
+        <h3>Methods</h3>
 
         <h3>Method 1: Blockwise Parallel Programming</h3>
         
@@ -155,17 +157,11 @@
         <p>The last method is to get rid of the local buffer and read the pixel values from the global memory directly instead. Theoretically, reading from the global memory would be slow. However, in my system, this method outperforms the other three.</p>
 
 
-
-
-
-
       </div>
       
 
-
-
       <div id="results", class="hidden">
-        <h2>Results</h2>
+        <h3>Results</h3>
         
         <p>The result from both images shows that the method without the buffer works best in my computer. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest.</p>
 
@@ -178,8 +174,12 @@
         <img src="img/originallion.png", align="left"> 
         <img src="img/l020i40lion.png", align="right">
         <img src="img/lionGraph.png">
-        
 
+        <h3> Screencast</h3>
+          <center>
+            <iframe width="620" height="445" src="http://www.youtube.com/embed/AW7ilDGMORY">
+            </iframe>
+          </center>
 
         <h3>Acknowledgements</h3>
         <p>We thank Thouis "Ray" Jones and all TFs for providing guidance and support.</p>
@@ -189,15 +189,14 @@
         <p>Wenshuai Ye: wenshuaiye@g.harvard.edu</p>
         <p>Yuhao Zhu: yuhaozhu@g.harvard.edu</p>
         
-
-        
       </div>
-
 
 
       <!-- Site footer -->
       <footer class="footer">
-        <p>&copy; Wenshuai Ye, Yuhao Zhu</p>
+        <p>&copy; Wenshuai Ye, Yuhao Zhu  &nbsp; &nbsp; &nbsp;
+          <a href="https://github.com/FroxieYe/Harvard-CS205-Parallel-Programming-Final/tree/master">
+          Github</a></p>
       </footer>
 
     </div> <!-- /container -->
