@@ -7,6 +7,9 @@
 ### Website
 http://froxieye.github.io/Harvard-CS205-Parallel-Programming-Final
 
+### Screencaset
+https://www.youtube.com/watch?v=AW7ilDGMORY&feature=youtu.be
+
 ### Background and Motivation
 In image processing and computer vision, anisotropic diffusion, also called Perona–Malik diffusion, is a technique aiming at reducing image noise without removing significant parts of the image content, typically edges, lines or other details that are important for the interpretation of the image. Mathematically, the pixels can be updated iteratively by averaging the gradients of their four neighbors, and the gradients can be approximated with the difference. g is an edge-stopping function and in our case, a Gaussian function.
 
