@@ -132,17 +132,20 @@
       </div>
 
       <div id="method", class="hidden">
-        <h3>Methods</h3>
+        <h3>Serial Version</h3>
+        <p> Our serial code is modified from the code published by the University of Oxford and takes advantage of vectorization in Numpy to speed up the process. We primarily adapt the code from the University of Oxford to the version proposed in the "Robust Anisotropic Diffusion paper" discussed in the Introduction section.
+
+        <h3>Parallel Methods</h3>
 
         <h3>Method 1: Blockwise Parallel Programming</h3>
         
-        <p>We partition the 2d image into multiple work groups, each with size (x, 2) where x takes in the value in [8, 16, 32, 64, 128]. We choose a relatively small height for each work group in that we read the value to the local buffer only when the one dimensional index is less than the width of the row and don't want that many threads to wait in the process. This method works best when the height of the image is relatively small.</p>
+        <p>We partition the 2d image into multiple workgroups, each of size (x, 2) where x takes in the value in [8, 16, 32, 64, 128]. We choose a relatively small height for each work group because we read the value to the local buffer only when the one dimensional index is less than the width of the row and don't want that many threads to wait in the process.</p>
 
         <img src="img/method1.png", style="width:300px">
 
         <h3>Method 2: Columnwise Parallel Programming</h3>
 
-        <p>This method sacrifices parallelization for less number of workgroups in total without changing the local size. Again, the local size is (x, 2) where x takes in the value in [8, 16, 32, 64, 128], and the height of the global size equals that of the local size. Since the global size does not cover the entire image, we use a loop within each work group to update the buffer and the output image pixels. This is definitely not the best method among three. We introduce an improved version in method 3, which utilizes the index trick.</p>
+        <p>This method sacrifices parallelization for less number of workgroups in total without changing the local size. Again, the local size is (x, 2) where x takes in the value in [8, 16, 32, 64, 128], and the height of the global size equals that of the local size. Since the global size does not cover the entire image, we use a loop within each workgroup to update the buffer and the output image pixels. We introduce an improved version in method 3, which utilizes the index trick to avoid reading the same values multiple times.</p>
 
         <img src="img/method2.png", style="width:300px">
 
@@ -155,15 +158,16 @@
         <h3>Method 4: Blockwise Parallel Programming without Local Buffer</h3>
 
         <p>The last method is to get rid of the local buffer and read the pixel values from the global memory directly instead. Theoretically, reading from the global memory would be slow. However, in my system, this method outperforms the other three.</p>
-
-
       </div>
       
 
       <div id="results", class="hidden">
         <h3>Results</h3>
-        
-        <p>The result from both images shows that the method without the buffer works best in my computer. In the Harvard library case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest.</p>
+        <h3>Serial Version (Vectorized Numpy Version) Performance</h3>
+        <p>It takes about 165 seconds to run in my machine using 40 iterations with the library image. We anticipate much higher performance using OpenCL.</p>
+
+        <h3>OpenCL Version Performance</h3>
+        <p>The result from both images shows that the method without the buffer works best in my computer. In the Harvard library image case, this is followed by the method with the buffer index trick, which does a slightly better job than the rest. They are over 300 times faster than the serial Numpy version.</p>
 
         <img src="img/original.png", align="left"> 
         <img src="img/after.png", align="right">
