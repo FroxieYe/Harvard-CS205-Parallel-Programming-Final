@@ -7,6 +7,11 @@ import numpy as np
 import pylab
 import warnings
  
+''' 
+This anisotropic diffusion serial (vectorized) implementation is adapted from 
+the one published by the University of Oxford.
+'''
+
 def anisodiff_vec(img,niter=10,kappa=35,gamma=0.2,step=(1.,1.),option=1,ploton=False):
         """
         Anisotropic diffusion.
@@ -100,7 +105,7 @@ def anisodiff_vec(img,niter=10,kappa=35,gamma=0.2,step=(1.,1.),option=1,ploton=F
  
         for ii in xrange(niter):
  
-                # calculate the diffs
+                # calculate the diffs of the four neighbors
                 deltaS[:-1,: ] = np.diff(imgout,axis=0)
                 deltaE[: ,:-1] = np.diff(imgout,axis=1)
                 deltaN[1:, :] = -np.diff(imgout,axis=0)
@@ -126,24 +131,8 @@ def anisodiff_vec(img,niter=10,kappa=35,gamma=0.2,step=(1.,1.),option=1,ploton=F
                 N = gN*deltaN
                 W = gW*deltaW
                 
-                '''
-                # subtract a copy that has been shifted 'North/West' by one
-                # pixel. don't as questions. just do it. trust me.
-                NS[:] = S
-                EW[:] = E
-                NS[1:,:] -= S[:-1,:]
-                EW[:,1:] -= E[:,:-1]
-                '''
-                
                 # update the image
                 imgout += gamma/4*(E+S+N+W)
-                '''
-                print imgout
-                print E
-                print S
-                print N
-                print W
-                '''
 
                 if ploton:
                         iterstring = "Iteration %i" %(ii+1)
@@ -167,7 +156,7 @@ if __name__ == '__main__':
     pylab.title('before - zoom')
 
     with Timer() as t:
-        new_image = anisodiff_vec(input_image, 10)
+        new_image = anisodiff_vec(input_image, 40)
     pylab.figure()
     pylab.imshow(new_image[1200:1800, 3000:3500])
     pylab.title('after - zoom')

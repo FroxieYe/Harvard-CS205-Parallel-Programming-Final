@@ -9,7 +9,10 @@ int maxx(int x, int y) {
   return (x > y) ? x : y;
 }
 
-// check the boundary of the buffer.
+/*
+check the boundary of the buffer. Set the value to the boundary 
+value if the index is negative or greater than the size
+*/
 float get_values(__global __read_only float *in_values,
               int w, int h,
               int x, int y)
@@ -19,11 +22,12 @@ float get_values(__global __read_only float *in_values,
     return in_values[b*w + a];
 }
 
+// anisotropic diffusion function g
 inline float g(float dif, float kappa){
     return exp(-1.0*(dif*dif/(kappa * kappa)));
-    //return 1;
 }
 
+// Read from the global memory directly (no buffer)
 __kernel void
 aniso_nobufferparallel(__global __read_only float *in_values,
            __global __write_only float *out_values,
@@ -52,7 +56,7 @@ aniso_nobufferparallel(__global __read_only float *in_values,
     }   
 }
 
-// 3x3 median filter
+// block parallel.
 __kernel void
 aniso_blockparallel(__global __read_only float *in_values,
            __global __write_only float *out_values,
@@ -112,7 +116,7 @@ aniso_blockparallel(__global __read_only float *in_values,
 }
 
 
-// 3x3 median filter
+// column parallel
 __kernel void
 aniso_colparallel(__global __read_only float *in_values,
            __global __write_only float *out_values,
@@ -166,12 +170,12 @@ aniso_colparallel(__global __read_only float *in_values,
             out_values[y * w + x] += lambda/4*value;      
         }
         y += buf_h-2;
-        //barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
 }
 
 
-// 3x3 median filter
+// reuse buffer with the index trick.
 __kernel void
 aniso_reusedparallel(__global __read_only float *in_values,
            __global __write_only float *out_values,

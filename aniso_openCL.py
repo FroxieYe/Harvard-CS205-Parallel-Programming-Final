@@ -16,19 +16,12 @@ def round_up(global_size, group_size):
         return global_size
     return global_size + group_size - r
 
-def numpy_median(image, iterations=10):
-    ''' filter using numpy '''
-    for i in range(iterations):
-        padded = np.pad(image, 1, mode='edge')
-        stacked = np.dstack((padded[:-2,  :-2], padded[:-2,  1:-1], padded[:-2,  2:],
-                             padded[1:-1, :-2], padded[1:-1, 1:-1], padded[1:-1, 2:],
-                             padded[2:,   :-2], padded[2:,   1:-1], padded[2:,   2:]))
-        image = np.median(stacked, axis=2)
-
-    return image
-
+'''
+We iterate over the four parallel methods with different local size width. we have verified that the first 8 digits 
+of their results are consistent with the results produced by the serial version.
+'''
 if __name__ == '__main__':
-    # List our platforms
+     
     size1 = [8, 16, 32, 64, 128]
     labels = ["Block Parallel", "Column Parallel", "Column Reused Buffer Parallel", "No Buffer Parallel"]
     for method in xrange(4):
@@ -66,20 +59,20 @@ if __name__ == '__main__':
 
             program = cl.Program(context, open('aniso_openCL.cl').read()).build(options=['-I', curdir])
 
+            # Load the image to numpy array.
             host_image = np.load('image.npz')['image'].astype(np.float32).copy()
             #host_image = imread("fc_lion.jpg").astype(np.float32).copy()
+
+            # Create a numpy array of the image size.
             host_image_filtered = np.zeros_like(host_image)
 
             gpu_image_a = cl.Buffer(context, cl.mem_flags.READ_WRITE, host_image.size * 4)
             gpu_image_b = cl.Buffer(context, cl.mem_flags.READ_WRITE, host_image.size * 4)
 
-            #256 pixels per work group, width > 48
-            #0. blocks reread 1. reread 2. blocks small register buffer
-            #register. instead of passing a pointer, we can pass in an array (10x34)
 
-            local_size = (size, 2)  # 64 pixels per work group (32, 8)
+            local_size = (size, 2)  
 
-            global_size = tuple([round_up(g, l) for g, l in zip(host_image.shape[::-1], local_size)]) #(global image size, 1)
+            global_size = tuple([round_up(g, l) for g, l in zip(host_image.shape[::-1], local_size)]) 
             if method not in {0,3}: global_size = (global_size[0], local_size[1])
 
             width = np.int32(host_image.shape[1])
@@ -114,21 +107,28 @@ if __name__ == '__main__':
      
             with Timer() as t1:
                 for iter in range(num_iters):
+                    # Parallel by Block with the global size covering the whole image.
                     if method == 0:
                         program.aniso_blockparallel(queue, global_size, local_size,
                                            gpu_image_a, gpu_image_b, local_memory,
                                            width, height,
                                            buf_width, buf_height, halo, np.float32(l));
+
+                    # Parallel by column. Each column should have one buffer only.
                     elif method == 1:
                         program.aniso_colparallel(queue, global_size, local_size,
                                            gpu_image_a, gpu_image_b, local_memory,
                                            width, height,
                                            buf_width, buf_height, halo, np.float32(l));
+
+                    # Index trick to avoid rereading values to the buffer.
                     elif method == 2:
                         program.aniso_reusedparallel(queue, global_size, local_size,
                                            gpu_image_a, gpu_image_b, local_memory,
                                            width, height,
                                            buf_width, buf_height, halo, np.float32(l));
+
+                    # Read from the global memory directly.
                     else:
                         program.aniso_nobufferparallel(queue, global_size, local_size,
                                            gpu_image_a, gpu_image_b, 
