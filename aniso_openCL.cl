@@ -44,15 +44,16 @@ aniso_nobufferparallel(__global __read_only float *in_values,
     if ((y < h) && (x < w)) { // stay in bounds
         // Anisotropic diffusion uses four neighbors to calculate diffusion.
         float cur_pix = in_values[y * w + x];
-        float dif1 = get_values(in_values, w, h, x+1, y);
-        float dif2 = get_values(in_values, w, h, x-1, y);
-        float dif3 = get_values(in_values, w, h, x, y+1);
-        float dif4 = get_values(in_values, w, h, x, y-1);
-
+        
+        float dif1 = get_values(in_values, w, h, x+1, y) - cur_pix;
+        float dif2 = get_values(in_values, w, h, x-1, y) - cur_pix;
+        float dif3 = get_values(in_values, w, h, x, y+1) - cur_pix;
+        float dif4 = get_values(in_values, w, h, x, y-1) - cur_pix;
+    
         out_values[y * w + x] = cur_pix;
         float value = g(dif1, k)*dif1 + g(dif2, k)*dif2 + g(dif3, k)*dif3 + g(dif4, k)*dif4;
         // Compute the updated pixel value after one iteration.
-        out_values[y * w + x] += lambda/4*value;      
+        out_values[y * w + x] += lambda/4*value;    
     }   
 }
 

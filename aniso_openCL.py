@@ -20,10 +20,15 @@ def round_up(global_size, group_size):
 We iterate over the four parallel methods with different local size width. we have verified that the first 8 digits 
 of their results are consistent with the results produced by the serial version.
 '''
-if __name__ == '__main__':
-     
+'''
+@param image_path : path of the image
+@param npzfile : a boolean indicating whether the image is an npz file.
+@param num_iters : nunmber of iterations
+'''
+def run_parallel_program(image_path, npzfile, num_iters):
     size1 = [8, 16, 32, 64, 128]
     labels = ["Block Parallel", "Column Parallel", "Column Reused Buffer Parallel", "No Buffer Parallel"]
+    host_image_filtered = None
     for method in xrange(4):
         times = []
         for size in size1:
@@ -60,8 +65,10 @@ if __name__ == '__main__':
             program = cl.Program(context, open('aniso_openCL.cl').read()).build(options=['-I', curdir])
 
             # Load the image to numpy array.
-            host_image = np.load('image.npz')['image'].astype(np.float32).copy()
-            #host_image = imread("fc_lion.jpg").astype(np.float32).copy()
+            if npzfile:
+                host_image = np.load(image_path)['image'].astype(np.float32).copy()
+            else:
+                host_image = imread(image_path).astype(np.float32).copy()
 
             # Create a numpy array of the image size.
             host_image_filtered = np.zeros_like(host_image)
@@ -90,20 +97,8 @@ if __name__ == '__main__':
 
             # Send image to the device, non-blocking
             cl.enqueue_copy(queue, gpu_image_a, host_image, is_blocking=False)
-            '''
-            pylab.gray()
 
-            pylab.imshow(host_image)
-            pylab.title('original image')
-
-            pylab.figure()
-            pylab.imshow(host_image[1200:1800, 3000:3500])
-            pylab.title('before - zoom')
-            '''
-           
-            
             l = 0.2
-            num_iters = 40
      
             with Timer() as t1:
                 for iter in range(num_iters):
@@ -141,11 +136,7 @@ if __name__ == '__main__':
                 
             print("{} seconds for 40 filter passes using vectorization in openCL.".format(t1.interval))
             times.append(t1.interval)
-            '''
-            pylab.figure()
-            pylab.imshow(host_image_filtered[1200:1800, 3000:3500])
-            pylab.title('after - zoom')
-            '''
+
             cl.enqueue_copy(queue, host_image_filtered, gpu_image_a, is_blocking=True)
         pylab.plot(size1, times, label = labels[method], marker = ".")
         pylab.title("Effciency vs Different Parallelization")
@@ -154,23 +145,32 @@ if __name__ == '__main__':
         pylab.legend(loc="best")
         
     pylab.show()
+    return host_image_filtered
 
-    '''
-    pylab.figure()
-    pylab.imshow(host_image_filtered[1200:1800, 3000:3500])
-    pylab.title('after - zoom lambda: ' + str(l) + ' #iterations: ' + str(num_iters))
-
-    pylab.show()
-    
-    
+'''
+@param image_path : path of the image
+@param npzfile : a boolean indicating whether the image is an npz file.   
+@param num_iters : number of iterations
+'''
+def run_serial_program(image_path, npzfile, num_iters):
+    if npzfile:
+        host_image = np.load(image_path)['image'].astype(np.float32).copy()
+    else:
+        host_image = imread(image_path).astype(np.float32).copy()
+    out_image = None
     with Timer() as t2:
-        out_image = aniso.anisodiff_vec(host_image)
+        out_image = aniso.anisodiff_vec(host_image, num_iters)
 
     print("{} seconds for 10 filter passes using vectorization in numpy.".format(t2.interval))
+    return out_image
 
-    print host_image_filtered[:,-1]
+def plot_image(filtered_image):
+    pylab.figure()
+    pylab.gray()
+    pylab.imshow(filtered_image)
+    pylab.title('after - zoom')
+    pylab.show()
 
-    print out_image[:,-1]
-    
-    assert np.allclose(host_image_filtered, aniso.anisodiff_vec(host_image))
-    '''
+if __name__ == '__main__':
+    res = run_parallel_program('image.npz', True, 40)
+    plot_image(res[1200:1800, 3000:3500])
