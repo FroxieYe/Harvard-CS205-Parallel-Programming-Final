@@ -70,12 +70,12 @@ Serial (vectorized) version of robust anisotropic diffusion.
 ```
 aniso_openCL.cl
 ```
-OpenCL kernel that contains three versions of parallel programming methods. They are blockwise parallel programming, columnwise parallel programming, and columnwise parallel programming with buffer reused.
+OpenCL kernel that contains four versions of parallel programming methods. They are blockwise parallel programming, columnwise parallel programming, columnwise parallel programming with buffer reused, and parallel programming without buffers.
 
 ```
 aniso_openCL.py
 ```
-python driver to run cl code.
+python driver to run cl code. "run_parallel_program" funcion runs the four parallel methods and returns the filtered image, whereas "run_serial_program" runs the serial method and returns the filtered image. "plot_image" visualizes the image.
 
 ```
 median_filter.cl

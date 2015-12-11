@@ -24,6 +24,7 @@ of their results are consistent with the results produced by the serial version.
 @param image_path : path of the image
 @param npzfile : a boolean indicating whether the image is an npz file.
 @param num_iters : nunmber of iterations
+@returns the filtered image
 '''
 def run_parallel_program(image_path, npzfile, num_iters):
     size1 = [8, 16, 32, 64, 128]
@@ -151,6 +152,7 @@ def run_parallel_program(image_path, npzfile, num_iters):
 @param image_path : path of the image
 @param npzfile : a boolean indicating whether the image is an npz file.   
 @param num_iters : number of iterations
+@returns the filtered image.
 '''
 def run_serial_program(image_path, npzfile, num_iters):
     if npzfile:
@@ -164,6 +166,10 @@ def run_serial_program(image_path, npzfile, num_iters):
     print("{} seconds for 10 filter passes using vectorization in numpy.".format(t2.interval))
     return out_image
 
+'''
+@param filtering_image : an numpy array
+@visualize the image.
+'''
 def plot_image(filtered_image):
     pylab.figure()
     pylab.gray()
